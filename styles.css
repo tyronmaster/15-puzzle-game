@@ -104,6 +104,20 @@ body::before {
   transition: 0.5s ease-in-out;
 }
 
+.button__start.active {
+display: block;
+}
+.button__start.active ~ .button__restart {
+  display: none;
+}
+
+.button__start {
+  display: none;
+  }
+.button__restart.active {
+    display: block;
+  }
+
 .puzzle__container {
   max-width: 300px;
   margin: 0 auto;
