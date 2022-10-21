@@ -44,32 +44,31 @@ footer.innerHTML = `<a class="github__link" href="https://github.com/tyronmaster
 
 // SOUND SECTION
 var sound = new Audio("./assets/sound/sound-01.mp3");
+sound.autoplay = false;
+sound.volume = 0.25;
+sound.loop = true;
 
-function startSound(sound) {
+function startSound() {
     sound.play();
-    sound.volume = 0.25;
-    sound.loop = true;
-};
-
-wrapper.addEventListener("click", () => {
-    startSound(sound);
     title.innerHTML = `<h1 class="puzzle__header">15 Puzzle Game</h1>
     <span class="tooltip">press title to MUTE / UNMUTE sound</span>`;
-    // wrapper.removeEventListener("click", );
-});
+    wrapper.removeEventListener("click", startSound);
+};
+
+wrapper.addEventListener("click", startSound);
 
 title.addEventListener("click", () => {
-    if(sound.muted){
-        sound.muted = false;
-        // title.innerHTML = `<h1 class="puzzle__header">15 Puzzle Game</h1>
-        //             <span class="tooltip">press title to MUTE sound</span>`;
+    if(sound.paused){
+        sound.play();
+        title.innerHTML = `<h1 class="puzzle__header">15 Puzzle Game</h1>
+        <span class="tooltip">press title to turn sound OFF</span>`;
 
     } else {
-        sound.muted = true;
-        // title.innerHTML = `<h1 class="puzzle__header">15 Puzzle Game</h1>
-        //             <span class="tooltip">press title to UNMUTE sound</span>`;
+        sound.pause();
+        title.innerHTML = `<h1 class="puzzle__header">15 Puzzle Game</h1>
+        <span class="tooltip">press title to turn sound ON</span>`;
     }
-});
+})
 
 
 // CREATE GAME FIELD
@@ -94,7 +93,6 @@ function FisherYets(array) {
     }
 }
 
-
 // draw puzzles
 let fieldSize = 4;
 let puzzlesCount = Math.pow(fieldSize, 2);
@@ -106,6 +104,12 @@ function drawPuzzlesField(puzzlesCount){
     main.innerHTML = '';
     puzzleOrder = CreateShuffledList(puzzlesCount);
 
+    // test if puzzle has solving and suffle again if not
+    while(hasSolving(puzzleOrder) === false){
+        puzzleOrder = CreateShuffledList(puzzlesCount);
+    }
+
+    // generate field
     for(let i = 0; i < puzzlesCount; i++){
         puzzlesArray[i] = drawElement(main, "div", "puzzle__item");
         puzzlesArray[i].textContent = i === 15 ? '': i + 1;
@@ -118,9 +122,37 @@ function drawPuzzlesField(puzzlesCount){
     return emptyPuzzle;
 }
 
+function hasSolving(puzzleArray){
+    let sum = 0;
+    let testedArr = [...puzzleArray];
+    for(let i = 0; i < puzzleArray.length; i++){
+        testedArr[Number(puzzleArray[i])] = i + 1;
+        // console.log(testedArr[i]);
+    }
+    // console.log(testedArr);
+
+    for(let i = 0; i < testedArr.length; i++){
+        if(testedArr[i] != 16){
+            for(let j = i; j < testedArr.length; j++) {
+                if(testedArr[i] < testedArr[j]){
+                    sum++;
+                }
+            }
+        } else {
+            sum += Math.ceil((i + 1) / fieldSize);
+    // console.log(Math.ceil((i + 1) / fieldSize));
+
+        }
+    }
+    // console.log(sum)
+    return sum % 2 === 0 ? true : false;
+}
+
 window.onload = drawPuzzlesField(puzzlesCount);
 restartButton.addEventListener("click", () => {
     drawPuzzlesField(puzzlesCount);
     // console.log(drawPuzzlesField(puzzlesCount));
 })
-// console.log(CreateShuffledList(16));
+// console.log(puzzlesArray);
+// console.log(puzzleOrder);
+// console.log(hasSolving(puzzleOrder));
