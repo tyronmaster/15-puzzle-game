@@ -29,7 +29,7 @@ title.innerHTML = `<h1 class="puzzle__header">15 Puzzle Game</h1>
                     <span class="tooltip">press background to PLAY sound</span>`;
 
 controls = drawElement("header", "div", "puzzle__controls");
-startButton = drawElement(controls, "div", "button button__start");
+startButton = drawElement(controls, "div", "button button__start active");
 startButton.textContent = "start";
 restartButton = drawElement(controls, "div", "button button__restart");
 restartButton.textContent = "restart";
@@ -116,7 +116,7 @@ function drawPuzzlesField(puzzlesCount){
         puzzlesArray[i].style.order = puzzleOrder[i];
 
         if(i === 15) {
-            emptyPuzzle = puzzleOrder[i];
+            emptyPuzzle = puzzleOrder[i] + 1;
         }
     }
     return emptyPuzzle;
@@ -148,11 +148,27 @@ function hasSolving(puzzleArray){
     return sum % 2 === 0 ? true : false;
 }
 
-window.onload = drawPuzzlesField(puzzlesCount);
-restartButton.addEventListener("click", () => {
+function drawStartPuzzlesField(puzzlesCount){
+    main.innerHTML = '';
+    for(let i = 0; i < puzzlesCount; i++){
+        puzzlesArray[i] = drawElement(main, "div", "puzzle__item");
+        puzzlesArray[i].textContent = i === 15 ? '': i + 1;
+    }
+}
+
+window.onload = drawStartPuzzlesField(puzzlesCount);
+startButton.addEventListener("click", (e) => {
     drawPuzzlesField(puzzlesCount);
+    e.currentTarget.classList.remove("active");
+    restartButton.classList.add("active");
+});
+restartButton.addEventListener("click", () => {
+    emptyPuzzle = drawPuzzlesField(puzzlesCount);
+
+    console.log(emptyPuzzle);
     // console.log(drawPuzzlesField(puzzlesCount));
-})
+});
 // console.log(puzzlesArray);
 // console.log(puzzleOrder);
 // console.log(hasSolving(puzzleOrder));
+console.log(emptyPuzzle);
