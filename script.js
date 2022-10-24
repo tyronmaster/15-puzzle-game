@@ -112,8 +112,12 @@ function drawPuzzlesField(puzzlesCount){
     // generate field
     for(let i = 0; i < puzzlesCount; i++){
         puzzlesArray[i] = drawElement(main, "div", "puzzle__item");
+        puzzlesArray[i].addEventListener("click", (e) => {
+            console.log(e.currentTarget);
+            gameLogic(fieldSize, puzzleOrder, emptyPuzzle, e.currentTarget.style.order);
+        })
         puzzlesArray[i].textContent = i === 15 ? '': i + 1;
-        puzzlesArray[i].style.order = puzzleOrder[i];
+        puzzlesArray[i].style.order = puzzleOrder[i] + 1;
 
         if(i === 15) {
             emptyPuzzle = puzzleOrder[i] + 1;
@@ -156,6 +160,15 @@ function drawStartPuzzlesField(puzzlesCount){
     }
 }
 
+function gameLogic(size, order, empty, target){ // send e.currentTarget.style.order to target
+    let targetRow = Math.ceil(target / size);
+    let targetColumn = target % size;
+    let emptyRow = Math.ceil(empty / size);
+    let emptyColumn = empty % size;
+    console.log("target:", targetRow, " ", targetColumn);
+    console.log("empty:", emptyRow, " ", emptyColumn);
+}
+
 window.onload = drawStartPuzzlesField(puzzlesCount);
 startButton.addEventListener("click", (e) => {
     drawPuzzlesField(puzzlesCount);
@@ -165,10 +178,12 @@ startButton.addEventListener("click", (e) => {
 restartButton.addEventListener("click", () => {
     emptyPuzzle = drawPuzzlesField(puzzlesCount);
 
+    console.log(puzzleOrder);
+
     console.log(emptyPuzzle);
     // console.log(drawPuzzlesField(puzzlesCount));
 });
 // console.log(puzzlesArray);
 // console.log(puzzleOrder);
 // console.log(hasSolving(puzzleOrder));
-console.log(emptyPuzzle);
+// console.log(emptyPuzzle);
