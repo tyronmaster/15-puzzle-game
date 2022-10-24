@@ -1,3 +1,29 @@
+/* LOCAL STORAGE */
+
+var score = [];
+var scoreItem = {};
+
+function setLocalStorage(scoreItem) {
+   console.log(scoreItem);
+   if (scoreItem) {
+      score.push(scoreItem);
+      score = JSON.stringify(score);
+      localStorage.setItem("Score", score);
+   }
+}
+
+function getLocalStorage() {
+   score = JSON.parse(localStorage.getItem("Score")) || [];
+   if (score.length > 10) {
+      score.shift();
+   }
+};
+
+window.addEventListener("load", getLocalStorage);
+
+/* local storage ends  ==========================*/
+
+
 // create element with classlist and append it to parent
 function drawElement(elementParent, elementType, elementClasslist){
     let elementName = document.createElement(elementType);
@@ -143,11 +169,14 @@ class Puzzle{
                 return false;
             }
         }
-        main.innerHTML = 'CONGRATS!';
-        main.innerHTML += `game finished in ${this.moves} moves`;
         const endTime = Date.now();
-        this.time = endTime - this.time;
-        console.log(this.time);
+        this.time = Math.floor((endTime - this.time) / 1000);
+        main.innerHTML = 'CONGRATS!';
+        main.innerHTML += `\ngame finished in ${this.moves} moves`;
+        main.innerHTML += `\nand in ${Math.floor(this.time / 60)} minutes, ${Math.floor(this.time % 60)} seconds `;
+        scoreItem.moves = this.moves;
+        scoreItem.time = this.time;
+        setLocalStorage(scoreItem);
     }
 
     gameLogic(target){ // send e.currentTarget.style.order to target
