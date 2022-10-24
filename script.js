@@ -68,107 +68,122 @@ title.addEventListener("click", () => {
         title.innerHTML = `<h1 class="puzzle__header">15 Puzzle Game</h1>
         <span class="tooltip">press title to turn sound ON</span>`;
     }
-})
+});
 
 
 // CREATE GAME FIELD
+class Puzzle{
+    constructor(fieldSize){
+        this.fieldSize = fieldSize;
+        this.puzzlesCount = Math.pow(fieldSize, 2);
+        this.puzzlesArray = [];
+        this.puzzleOrder = [];
+        this.moves = 0;
+    }
 
-// create random list
-function CreateShuffledList(itemsCount) {
+    drawStartPuzzlesField(){
+        main.innerHTML = '';
+        let arr = [];
+        for(let i = 0; i < this.puzzlesCount; i++){
+            arr[i] = drawElement(main, "div", "puzzle__item");
+            arr[i].textContent = i === 15 ? '': i + 1;
+        }
+    }
+
+    drawPuzzlesField(){
+        main.innerHTML = '';
+        this.puzzleOrder = this.CreateShuffledList(this.puzzlesCount);
+
+        // test if puzzle has solving and suffle again if not
+        while(this.hasSolving(this.puzzleOrder) == false){
+            this.puzzleOrder = this.CreateShuffledList(this.puzzlesCount);
+        }
+
+        // generate field
+        for(let i = 0; i < this.puzzlesCount; i++){
+            this.puzzlesArray[i] = drawElement(main, "div", "puzzle__item");
+            this.puzzlesArray[i].textContent = i === 15 ? '': i + 1;
+            this.puzzlesArray[i].style.order = this.puzzleOrder[i] + 1;
+        }
+        this.puzzlesArray.forEach((item) => {
+            item.addEventListener("click", (e) => {
+                this.gameLogic(e.currentTarget);
+                this.isSolved();
+            });
+        });
+    }
+
+    hasSolving(){
+        let sum = 0;
+        console.log(this.puzzleOrder);
+        for(let i = 0; i < this.puzzlesCount - 1; i++){
+                for(let j = i+1; j < this.puzzlesCount; j++) {
+                    if(this.puzzleOrder[i] > this.puzzleOrder[j]){
+                        sum++;
+                    }
+                }
+            }
+        sum += Math.ceil(this.puzzleOrder[this.puzzlesCount - 1] / this.fieldSize);
+        return sum % 2 === 0 ? true : false;
+    }
+
+    isSolved(){
+        for(let i = 0; i < this.puzzlesCount; i++){
+            if(i !== Number(this.puzzlesArray[i].style.order - 1)){
+                return false;
+            }
+        }
+        main.innerHTML = 'CONGRATS!';
+        main.innerHTML += `game finished in ${this.moves} moves`;
+    }
+
+    gameLogic(target){ // send e.currentTarget.style.order to target
+        let emptyOrder = Number(this.puzzlesArray[this.puzzlesCount - 1].style.order);
+        let targetOrder = Number(target.style.order);
+        let targetRow = Math.ceil(targetOrder / this.fieldSize);
+        let targetColumn = targetOrder % this.fieldSize || 4;
+        let emptyRow = Math.ceil(emptyOrder / this.fieldSize);
+        let emptyColumn = emptyOrder % this.fieldSize || 4;
+        let option1 = (targetRow == emptyRow) && ((targetColumn == emptyColumn - 1) || (targetColumn == emptyColumn + 1));
+        let option2 = (targetColumn == emptyColumn) && ((targetRow == emptyRow - 1) || (targetRow == emptyRow + 1));
+        if(option1 || option2){
+            let t = target.style.order;
+            target.style.order = emptyOrder;
+            this.puzzlesArray[this.puzzlesCount - 1].style.order = t;
+        this.moves++;
+
+        }
+    }
+
+    // create random list
+    CreateShuffledList(itemsCount) {
     let randomArray = [];
     for (let i = 0; i < itemsCount; i++) {
         randomArray.push(i);
     }
-    FisherYets(randomArray);
+    this.FisherYets(randomArray);
     return randomArray;
-}
+    }
 
-// fisher-yets algorithm to shuffle array
-function FisherYets(array) {
+    // fisher-yets algorithm to shuffle array
+    FisherYets(array) {
     for (let i = array.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1));
         let t = array[i];
         array[i] = array[j];
         array[j] = t;
     }
-}
-
-// draw puzzles
-let fieldSize = 4;
-let puzzlesCount = Math.pow(fieldSize, 2);
-let puzzlesArray = [];
-let puzzleOrder = [];
-let emptyPuzzle = puzzlesCount - 1;
-
-function drawPuzzlesField(puzzlesCount){
-    main.innerHTML = '';
-    puzzleOrder = CreateShuffledList(puzzlesCount);
-
-    // test if puzzle has solving and suffle again if not
-    while(hasSolving(puzzleOrder) === false){
-        puzzleOrder = CreateShuffledList(puzzlesCount);
-    }
-
-    // generate field
-    for(let i = 0; i < puzzlesCount; i++){
-        puzzlesArray[i] = drawElement(main, "div", "puzzle__item");
-        puzzlesArray[i].textContent = i === 15 ? '': i + 1;
-        puzzlesArray[i].style.order = puzzleOrder[i];
-
-        if(i === 15) {
-            emptyPuzzle = puzzleOrder[i] + 1;
-        }
-    }
-    return emptyPuzzle;
-}
-
-function hasSolving(puzzleArray){
-    let sum = 0;
-    let testedArr = [...puzzleArray];
-    for(let i = 0; i < puzzleArray.length; i++){
-        testedArr[Number(puzzleArray[i])] = i + 1;
-        // console.log(testedArr[i]);
-    }
-    // console.log(testedArr);
-
-    for(let i = 0; i < testedArr.length; i++){
-        if(testedArr[i] != 16){
-            for(let j = i; j < testedArr.length; j++) {
-                if(testedArr[i] < testedArr[j]){
-                    sum++;
-                }
-            }
-        } else {
-            sum += Math.ceil((i + 1) / fieldSize);
-    // console.log(Math.ceil((i + 1) / fieldSize));
-
-        }
-    }
-    // console.log(sum)
-    return sum % 2 === 0 ? true : false;
-}
-
-function drawStartPuzzlesField(puzzlesCount){
-    main.innerHTML = '';
-    for(let i = 0; i < puzzlesCount; i++){
-        puzzlesArray[i] = drawElement(main, "div", "puzzle__item");
-        puzzlesArray[i].textContent = i === 15 ? '': i + 1;
     }
 }
 
-window.onload = drawStartPuzzlesField(puzzlesCount);
+let puzzle = new Puzzle(4);
+puzzle.drawStartPuzzlesField();
+
 startButton.addEventListener("click", (e) => {
-    drawPuzzlesField(puzzlesCount);
+    puzzle.drawPuzzlesField();
     e.currentTarget.classList.remove("active");
     restartButton.classList.add("active");
 });
 restartButton.addEventListener("click", () => {
-    emptyPuzzle = drawPuzzlesField(puzzlesCount);
-
-    console.log(emptyPuzzle);
-    // console.log(drawPuzzlesField(puzzlesCount));
+    puzzle.drawPuzzlesField()
 });
-// console.log(puzzlesArray);
-// console.log(puzzleOrder);
-// console.log(hasSolving(puzzleOrder));
-console.log(emptyPuzzle);
